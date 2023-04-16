@@ -1,5 +1,5 @@
 const OrderModel = require('./models/orderModel')
-const QModel = require('./models/Qmodel');
+
 
 
 //THIS CLASS RETURNS A QUEUE INSTANCE.
