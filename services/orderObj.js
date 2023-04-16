@@ -8,13 +8,13 @@ class Queue {
         if (Queue.instance) {
             return Queue.instance;
           }
-        this.orderModel =  Order;
+        this.order =  Order;
         Queue.instance = this;
      
     }
 
-    async enqueue(customer, quantity) {
-        const orderData = new this.orderModel(customer, quantity);
+    async enqueue(customer, quantity, destination) {
+        const orderData = new this.order(customer, quantity, destination);
         await orderData.save();
         return this.getQueue();
     }
@@ -24,28 +24,27 @@ class Queue {
         return oldestOrder;
     }
 
-    length() {
-        this.queue.length();
-    }
-
     async remove(id) {
         const removeOrder = await OrderModel.findOneAndDelete({id : id });
         return removeOrder;
     }
 
-    async getQueue() {
-        const allOrders = await OrderModel.find({},  { username: 1, id: 1, _id: 0 }).sort({ created_at: 1 });
+    async getQueue(findQuery, sortQuery = { createdAt: 1 }, skip = 1, per_page = 10 ) {
+        console.log(findQuery)
+        const allOrders = await OrderModel.find(findQuery, {id: 1, username: 1, destination: 1,  _id: 0 }).sort(sortQuery).skip(skip).limit(per_page);
         return allOrders;
     }
+
 }
 
 
 
 //THIS CLASS RETURNS AN ORDER INSTANCE THAT IS ADDED TO THE QUEUE.
 class Order {
-    constructor(customer, quantity) {
+    constructor(customer, quantity,destination) {
         this.customer = customer;
         this.quantity = quantity;
+        this.destination = destination
         this.total =  this.calculateTotal(),
         this.id =  Math.floor(Math.random() * 10000);
     }
@@ -54,6 +53,7 @@ class Order {
         const orderData = {
             username: this.customer,
             quantity: this.quantity,
+            destination: this.destination,
             id: this.id,
             total: this.total,
         };

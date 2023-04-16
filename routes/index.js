@@ -3,7 +3,7 @@ const router = express.Router();
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-  res.render('index', { title: 'Avian Farms' });
+  res.json('index', { message : ' Welcome to Avian Farms' });
 });
 
 module.exports = router;
