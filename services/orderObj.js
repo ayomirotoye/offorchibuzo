@@ -1,65 +1,79 @@
-const OrderModel = require('../models/order')
+const OrderModel = require('./models/orderModel')
+const QModel = require('./models/Qmodel');
 
 
-class OrderQueue {
+//THIS CLASS RETURNS A QUEUE INSTANCE.
+class Queue {
     constructor() {
-        this.queue = [];
-        this.length = length;
-        this.enqueue = enqueue;
-        this.dequeue = dequeue;
+        if (Queue.instance) {
+            return Queue.instance;
+          }
+        this.orderModel =  Order;
+        Queue.instance = this;
+     
     }
 
-    enqueue(id) {
-        this.queue.push(id);
+    async enqueue(customer, quantity) {
+        const orderData = new this.orderModel(customer, quantity);
+        await orderData.save();
+        return this.getQueue();
     }
 
-    dequeue() {
-        this.queue.shift();
+    async dequeue() {
+        const oldestOrder = await OrderModel.findOneAndDelete({}, { sort: { createdAt: 1 } });
+        return oldestOrder;
     }
 
     length() {
         this.queue.length();
     }
 
+    async remove(id) {
+        const removeOrder = await OrderModel.findOneAndDelete({id : id });
+        return removeOrder;
+    }
+
+    async getQueue() {
+        const allOrders = await OrderModel.find({},  { username: 1, id: 1, _id: 0 }).sort({ created_at: 1 });
+        return allOrders;
+    }
 }
 
 
+
+//THIS CLASS RETURNS AN ORDER INSTANCE THAT IS ADDED TO THE QUEUE.
 class Order {
     constructor(customer, quantity) {
         this.customer = customer;
         this.quantity = quantity;
         this.total =  this.calculateTotal(),
-        this.status = false;
         this.id =  Math.floor(Math.random() * 10000);
     }
 
     async save() {
         const orderData = {
-            customer: { sessionId: this.customer} ,
+            username: this.customer,
             quantity: this.quantity,
-            totalCost: this.calculateTotal(),
-            status: this.status,
-            id: this.id
+            id: this.id,
+            total: this.total,
         };
         const order = new OrderModel(orderData);
         await order.save();
-        return order._id;
+        return order.id;
+    }
+
+    async remove(id) {
+         const order =  OrderModel.deleteOne({id: id});
+        return order.id;
     }
 
     calculateTotal() {
-        let total = 0;
-        this.items.forEach(item => {
-           
-            total += Number(item[1]);
-        });
-       
+        let total = this.quantity * 2000;
         return total;
-    }
-
-    getOrderDetails() {
-        const orderItems = this.items;
-        return { items: orderItems, total: this.calculateTotal()};
     }
 }
 
-module.exports = Order;
+const orderQueue = new Queue();
+
+
+module.exports = { Order, orderQueue };

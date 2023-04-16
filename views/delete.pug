@@ -1,0 +1,14 @@
+extends layout
+
+block content
+    form(method="post")
+    fieldset
+        legend General
+        p
+        label(for="user[name]") Username:
+            input(type="text", name="user[name]")
+        p
+        label(for="quantity") id:
+            input(type="number", name="quantity" min=0)
+        p.buttons
+            input(type="submit", value="Confirm")

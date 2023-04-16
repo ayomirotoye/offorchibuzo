@@ -1,23 +1,20 @@
 const mongoose = require('mongoose');
 
 const orderSchema = new mongoose.Schema({
-    customer: {
-        sessionId: {
-            type: String,
-            required: true
-        }
+    username: {
+        type: String,
+        required: true
     },
     id: Number,
-    items: {
-        type: [[String]], 
+    quantity: {
+        type: Number, 
         required: true
     },
-    totalCost: {
+    total: {
         type: Number,
         required: true
-    },
-    status: {type: Boolean, default: false}
-}, {timestamp: true});
+    }
+}, { timestamps : true });
 
 const OrderModel = mongoose.model('Order', orderSchema);
 
